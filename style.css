@@ -82,32 +82,42 @@ a { color: inherit; text-decoration: none; }
   100% { opacity: 1; }
 }
 
-.cast-carousel__container {
+/* 이미지를 올려 놓는 무대.
+   여기 담긴 이미지의 '기준 크기'가 곧 마지막에 보여줄 전체 모습이다.
+   위쪽에 붙여 두는 이유: 축소될 때 남는 여백이 전부 아래로 몰려야
+   그 자리를 아래 이미지가 올라와 메울 수 있다. */
+.cast-carousel__stage {
+  position: absolute;
+  inset: 0;
   display: flex;
-  height: 100%;
-  transform: translate3d(0, 0, 0);
-  will-change: transform;
-  align-items: stretch;
+  align-items: flex-start;
+  justify-content: center;
 }
 
 .cast-carousel__img {
-  flex-shrink: 0;
-  height: 100%;
-  width: auto;
-  /* 리셋의 img{max-width:100%}가 이미지를 화면 폭으로 눌러버리면
-     넘치는 폭이 0이 되어 가로로 밀 거리가 사라진다. 반드시 풀어줄 것. */
+  /* 기준 = 폭 100%(=화면 폭), 높이는 원본 비율대로.
+     이 상태가 scale(1) 이고, 이미지가 16:9면 그대로 16:9 레터박스가 된다. */
+  width: 100%;
+  height: auto;
   max-width: none;
   display: block;
+  /* 윗변을 고정한 채 줄어든다 (무대의 flex-start 와 짝) */
+  transform-origin: 50% 0;
+  will-change: transform;
 }
 
 /* =========================================================
    2) 풀 페이지 랜딩
    ========================================================= */
+/* 메인이 축소되며 아래에 생기는 여백만큼 통째로 끌어올린다.
+   --shift 는 JS가 매 프레임 갱신하고, margin-bottom 의 음수값은
+   그만큼 짧아진 문서 높이를 맞추기 위해 measure() 가 한 번만 넣는다. */
 .lineup-full {
   position: relative;
   width: 100%;
   overflow: hidden;
   background: var(--navy-800);
+  transform: translate3d(0, var(--shift, 0px), 0);
 }
 
 .lineup-full__img {
@@ -127,10 +137,13 @@ a { color: inherit; text-decoration: none; }
     animation-iteration-count: 1 !important;
     transition-duration: .001ms !important;
   }
-  .cast-carousel__img { opacity: 1 !important; }
   .cast-carousel__scroll-hint { opacity: 1 !important; }
-  /* 가로 이동을 하지 않으므로 트랙을 한 화면으로 줄이고 가로 스크롤로 대체한다 */
+  /* 확대도 이동도 하지 않는다. scale(1) = 이미지 전체가 보이는 상태라
+     별도 대체 화면 없이 곧바로 최종 모습만 보여주면 된다. */
   .cast-carousel { height: auto !important; }
-  .cast-carousel__sticky { position: static; overflow-x: auto; }
-  .cast-carousel__container { transform: none !important; }
+  .cast-carousel__sticky { position: static; height: auto; }
+  .cast-carousel__stage { position: static; }
+  .cast-carousel__img { transform: none !important; }
+  /* 여백이 생기지 않으므로 끌어올릴 것도 없다 */
+  .lineup-full { transform: none !important; margin-top: 0 !important; }
 }
